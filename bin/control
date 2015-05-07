@@ -1,0 +1,63 @@
+#!/bin/bash
+
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+
+OPENSHIFT_MP_PIDFILE=${OPENSHIFT_MAINTENANCE_PAGE_DIR}run/oracle.pid
+OPENSHIFT_MPSRC=${OPENSHIFT_DATA_DIR}.oraclesrc
+
+function start() {
+ echo "Stopping maintenance web server."
+ MAINTENANCE_PID_FILE="${OPENSHIFT_DATA_DIR}/maintenance.pid"
+
+ if [ -f $MAINTENANCE_PID_FILE ]; then
+   MAINTENANCE_PID=$(cat $MAINTENANCE_PID_FILE)
+   if [ -n "$MAINTENANCE_PID" ]; then
+       kill -9 $MAINTENANCE_PID  2>/dev/null
+       rm -rf $MAINTENANCE_PID_FILE;
+   else
+       echo "There isn't maintenance web server."
+   fi
+ fi
+}
+
+function stop() {
+  echo "Starting maintenance web server."
+
+  MAINTENANCE_PID_FILE="${OPENSHIFT_DATA_DIR}/maintenance.pid"
+
+  if [ ! -f $MAINTENANCE_PID_FILE ]; then
+
+    if [ -z "$MAINTENANCE_PID" ]; then
+      nohup python ${OPENSHIFT_MAINTENANCE_PAGE_DIR}/maintenance.py > /tmp/nohup.out 2>&1&
+      echo $! > $MAINTENANCE_PID_FILE
+    fi
+  fi
+
+}
+
+function restart() {
+    stop
+    start
+}
+
+function status() {
+  return 0
+}
+
+function reload() {
+  :
+}
+
+function tidy() {
+  echo "Nothing to clean."
+}
+
+case "$1" in
+  start) start ;;
+  stop) stop ;;
+  restart) restart ;;
+  status) status ;;
+  reload) reload ;;
+  tidy) tidy ;;
+  *) exit 0
+esac
