@@ -2,12 +2,12 @@
 
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
 
-OPENSHIFT_MP_PIDFILE=${OPENSHIFT_MAINTENANCE_PAGE_DIR}run/oracle.pid
-OPENSHIFT_MPSRC=${OPENSHIFT_DATA_DIR}.oraclesrc
+MAINTENANCE_PID_FILE=${OPENSHIFT_MAINTENANCE_PAGE_DIR}/run/maintenance.pid
+OPENSHIFT_MPSRC=${OPENSHIFT_DATA_DIR}.maintenance_page_rc
 
 function start() {
- echo "Stopping maintenance web server."
- MAINTENANCE_PID_FILE="${OPENSHIFT_DATA_DIR}/maintenance.pid"
+ client_result "Stop Maintenance Page!"
+ client_result ""
 
  if [ -f $MAINTENANCE_PID_FILE ]; then
    MAINTENANCE_PID=$(cat $MAINTENANCE_PID_FILE)
@@ -21,14 +21,13 @@ function start() {
 }
 
 function stop() {
-  echo "Starting maintenance web server."
-
-  MAINTENANCE_PID_FILE="${OPENSHIFT_DATA_DIR}/maintenance.pid"
+  client_result "Starting Maintenance Page!"
+  client_result ""
 
   if [ ! -f $MAINTENANCE_PID_FILE ]; then
 
     if [ -z "$MAINTENANCE_PID" ]; then
-      nohup python ${OPENSHIFT_MAINTENANCE_PAGE_DIR}/maintenance.py > /tmp/nohup.out 2>&1&
+      nohup python ${OPENSHIFT_MAINTENANCE_PAGE_DIR}/lib/maintenance.py > /tmp/nohup.out 2>&1&
       echo $! > $MAINTENANCE_PID_FILE
     fi
   fi

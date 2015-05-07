@@ -5,5 +5,5 @@ source $OPENSHIFT_CARTRIDGE_SDK_BASH
 mkdir -p ${OPENSHIFT_MAINTENANCE_PAGE_DIR}/run
 mkdir -p ${OPENSHIFT_MAINTENANCE_PAGE_DIR}/log
 
-client_result "Oracle connection information has been added to your applicaiton."
+client_result "StartApp Maintenance Page plugin was added successfuly to your application."
 client_result ""

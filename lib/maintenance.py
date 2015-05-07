@@ -6,8 +6,20 @@ import BaseHTTPServer
 import urllib
 
 CUSTOM_PAGE = os.getenv("MAINTENANCE_URL", None)
-HOST_NAME = os.getenv("OPENSHIFT_RUBY_IP")
-PORT_NUMBER = int(os.getenv("OPENSHIFT_RUBY_PORT"))
+
+HOST_NAME = os.getenv("OPENSHIFT_RUBY_IP") \
+            or os.getenv("OPENSHIFT_PHP_IP") \
+            or os.getenv("OPENSHIFT_NODEJS_IP") \
+            or os.getenv("OPENSHIFT_PYTHON_IP") \
+            or os.getenv("OPENSHIFT_DIY_IP")
+
+PORT_NUMBER = os.getenv("OPENSHIFT_RUBY_PORT") \
+                or os.getenv("OPENSHIFT_PHP_PORT") \
+                or os.getenv("OPENSHIFT_NODEJS_PORT") \
+                or os.getenv("OPENSHIFT_PYTHON_PORT") \
+                or os.getenv("OPENSHIFT_DIY_PORT")
+
+PORT_NUMBER = int(PORT_NUMBER)
 
 class MaintenanceHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
@@ -61,12 +73,32 @@ class MaintenanceHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_error(404, 'File not found: %s' % self.path)
 
 if __name__ == '__main__':
-   server_class = BaseHTTPServer.HTTPServer
-   httpd = server_class((HOST_NAME, PORT_NUMBER), MaintenanceHandler)
-   print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
-   try:
-      httpd.serve_forever()
-   except KeyboardInterrupt:
-      pass
-   httpd.server_close()
-   print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    server_class = BaseHTTPServer.HTTPServer
+
+    for retry in range(100):
+        try:
+            httpd = server_class((HOST_NAME, PORT_NUMBER), MaintenanceHandler)
+        except:
+            print "Retry"
+            time.sleep(0.1)
+
+        try:
+            httpd
+        except NameError, e:
+            pass
+        else:
+            break
+
+    print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
+
+    try:
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+
+        httpd.server_close()
+    except NameError, e:
+        pass
+
+    print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
